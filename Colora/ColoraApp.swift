@@ -11,7 +11,9 @@ import SwiftUI
 struct ColoraApp: App {
     var body: some Scene {
         WindowGroup {
-            CalendarView()
+            CalendarView(
+                showCalendar: .constant(true)
+            )
         }
     }
 }
