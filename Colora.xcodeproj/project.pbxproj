@@ -29,9 +29,22 @@
 		A8021C892E8919A60037B994 /* ColoraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ColoraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		AC24545D2E8E6F0400E372EA /* Exceptions for "Colora" folder in "Colora" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A8021C712E8919A60037B994 /* Colora */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A8021C742E8919A60037B994 /* Colora */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				AC24545D2E8E6F0400E372EA /* Exceptions for "Colora" folder in "Colora" target */,
+			);
 			path = Colora;
 			sourceTree = "<group>";
 		};
@@ -43,6 +56,11 @@
 		A8021C8C2E8919A60037B994 /* ColoraUITests */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			path = ColoraUITests;
+			sourceTree = "<group>";
+		};
+		AC2454572E8E6EF400E372EA /* Fonts */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Fonts;
 			sourceTree = "<group>";
 		};
 /* End PBXFileSystemSynchronizedRootGroup section */
@@ -75,6 +93,7 @@
 		A8021C692E8919A60037B994 = {
 			isa = PBXGroup;
 			children = (
+				AC2454572E8E6EF400E372EA /* Fonts */,
 				A8021C742E8919A60037B994 /* Colora */,
 				A8021C822E8919A60037B994 /* ColoraTests */,
 				A8021C8C2E8919A60037B994 /* ColoraUITests */,
@@ -109,6 +128,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A8021C742E8919A60037B994 /* Colora */,
+				AC2454572E8E6EF400E372EA /* Fonts */,
 			);
 			name = Colora;
 			packageProductDependencies = (
@@ -397,6 +417,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Colora/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
@@ -425,6 +446,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Colora/Info.plist;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
