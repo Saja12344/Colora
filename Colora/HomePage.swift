@@ -10,6 +10,8 @@ import SwiftUI
 struct HomePage: View {
     @State private var showCalendar = false
     @StateObject private var audio = AudioManager.shared
+    @AppStorage("userName") private var userName: String = ""
+
 
     
     var body: some View {
@@ -51,14 +53,16 @@ struct HomePage: View {
                     
                     VStack(alignment: .leading) {
                         
-                        HStack{
+                        HStack {
                             Text("Welcome")
                                 .font(.system(size: 36, weight: .bold))
                                 .foregroundStyle(.white)
-                            Text("Team 19,")
+
+                            Text(userName.isEmpty ? "Team 19," : "\(userName),") // ✅ shows saved name
                                 .font(.system(size: 36, weight: .bold))
                                 .foregroundColor(Color(red: 176/255, green: 166/255, blue: 223/255))
                         }
+
                         
                         Text("To your creative space!")
                             .font(.system(size: 36, weight: .medium))
