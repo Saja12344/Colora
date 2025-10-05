@@ -29,9 +29,22 @@
 		A8021C892E8919A60037B994 /* ColoraUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = ColoraUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
+/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
+		A878A69C2E912AEE00359B24 /* Exceptions for "Colora" folder in "Colora" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A8021C712E8919A60037B994 /* Colora */;
+		};
+/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
+
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A8021C742E8919A60037B994 /* Colora */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A878A69C2E912AEE00359B24 /* Exceptions for "Colora" folder in "Colora" target */,
+			);
 			path = Colora;
 			sourceTree = "<group>";
 		};
