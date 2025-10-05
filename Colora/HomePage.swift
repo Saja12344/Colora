@@ -9,11 +9,23 @@ import SwiftUI
 
 struct HomePage: View {
     @State private var showCalendar = false
+    @StateObject private var audio = AudioManager.shared
+
     
     var body: some View {
         NavigationStack{
             ZStack{
                 Color.clear.appBackground()
+            
+                    .onAppear {
+                        if audio.isPlaying {
+                            audio.play() // لو شغال، يكمل
+                        }
+                    }
+                    .onDisappear {
+                        // ممكن تخلينه فاضي أو توقفين الصوت لو حبيتي
+                    }
+                
                 VStack {
                     // أيقونة الكالندر
                     Button {

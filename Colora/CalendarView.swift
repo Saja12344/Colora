@@ -1,5 +1,6 @@
 import SwiftUI
 import UIKit // لأننا نستخدم UIImage(named:)
+import AVFoundation
 
 struct CalendarMonth: Identifiable {
     let id = UUID()
@@ -217,7 +218,8 @@ struct PopupView: View {
     @Binding var teamName: String
     @Binding var isEditing: Bool
     @Binding var isSoundOn: Bool
-    
+    @StateObject private var audio = AudioManager.shared
+
     var body: some View {
         ZStack {
             Color.black.opacity(0.4)
@@ -267,18 +269,24 @@ struct PopupView: View {
                 HStack(spacing: 160)  {
                     Text("Sounds")
                         .foregroundColor(.white)
-                    
-                    Toggle("", isOn: $isSoundOn)
-                        .toggleStyle(SpeakerToggleStyle(
-                            onColor: AppTheme.Streak,
-                            offColor: .gray.opacity(0.3),
-                            iconColor: .black,
-                            shadowColor: AppTheme.Streak
-                        ))
+
+                    Toggle(isOn: $audio.isPlaying) {
+                        Image(systemName: audio.isPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                            .foregroundColor(.white)
+                    }
+                    .labelsHidden()
+                    .onChange(of: audio.isPlaying) { playing in
+                        playing ? audio.play() : audio.pause()
+                    }
+                    .toggleStyle(SpeakerToggleStyle(
+                        onColor: AppTheme.Streak,
+                        offColor: Color.gray.opacity(0.2),
+                        iconColor: Color.black,
+                        shadowColor: AppTheme.accent )
+                                 )
                 }
 
             }
-            .padding()
             .frame(width: 350,height: 280)
             
             //background -- glass with grean
@@ -290,47 +298,18 @@ struct PopupView: View {
             .cornerRadius(16)
             .shadow(radius: 10)
         }
-    }
-}
-
-// MARK: - Toggle Style (موجود قبل لكن تأكدت إنه هنا)
-struct SpeakerToggleStyle: ToggleStyle {
-    var onColor: Color
-    var offColor: Color
-    var iconColor: Color
-    var shadowColor: Color
-
-    private let trackWidth: CGFloat = 88
-    private let trackHeight: CGFloat = 44
-    private let padding: CGFloat = 4
-
-    func makeBody(configuration: Configuration) -> some View {
-        let knobSize = trackHeight - padding * 2
-        let travel = (trackWidth - knobSize) / 2
-
-        return ZStack {
-            Capsule()
-                .fill(configuration.isOn ? onColor : offColor)
-                .frame(width: trackWidth, height: trackHeight)
-                .shadow(color: configuration.isOn ? shadowColor.opacity(0.35) : .clear,
-                        radius: 12, x: 10, y: 6)
-
-            Circle()
-                .fill(.white)
-                .frame(width: knobSize, height: knobSize)
-                .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 3)
-                .overlay(
-                    Image(systemName: configuration.isOn ? "speaker.wave.2" : "speaker.slash")
-                        .font(.system(size: 15, weight: .semibold))
-                        .foregroundStyle(iconColor)
-                )
-                .offset(x: configuration.isOn ? travel : -travel)
-                .animation(.spring(response: 0.25, dampingFraction: 0.9), value: configuration.isOn)
+        // اهم شيء هو يشتغل الصوت
+        .onAppear {
+            audio.configureSession()
+            audio.load(resource: "music", ext: "mp3")
+            if audio.isPlaying { audio.play() }
         }
-        .contentShape(Rectangle())
-        .onTapGesture { configuration.isOn.toggle() }
+        
     }
+    
 }
+
+
 #if DEBUG
 struct InfiniteCalendarView_Previews: PreviewProvider {
     static var previews: some View {

@@ -1,7 +1,7 @@
 import SwiftUI
 import AVFoundation
 
-// MARK: - Slide model
+//// MARK: - Slide model
 struct OnboardingSlide: Identifiable {
     let id = UUID()
     let tagTitle: String
@@ -10,62 +10,67 @@ struct OnboardingSlide: Identifiable {
     let iconSystemName: String // outline SF Symbol (no ".fill")
     let imageName: String      // Asset name (PNG/JPG)
 }
-
-// MARK: - Simple audio manager for looping bg music
-final class AudioManager: ObservableObject {
-    private var player: AVAudioPlayer?
-
-    func configureSession() {
-        do {
-            // .ambient respects the silent switch (no background capability needed)
-            // Use .playback if you want to ignore silent switch
-            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [])
-            try AVAudioSession.sharedInstance().setActive(true)
-        } catch {
-            print("⚠️ Audio session error:", error)
-        }
-    }
-
-    func load(resource: String, ext: String) {
-        guard let url = Bundle.main.url(forResource: resource, withExtension: ext) else {
-            print("❌ music file not found: \(resource).\(ext)")
-            return
-        }
-        do {
-            player = try AVAudioPlayer(contentsOf: url)
-            player?.numberOfLoops = -1       // loop forever
-            player?.prepareToPlay()
-            player?.volume = 0.5
-        } catch {
-            print("⚠️ AVAudioPlayer init failed:", error)
-        }
-    }
-
-    func play() {
-        player?.play()
-    }
-
-    func pause() {
-        player?.pause()
-    }
-
-    func stop() {
-        player?.stop()
-        player = nil
-        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
-    }
-}
+//
+//// MARK: - Simple audio manager for looping bg music
+//final class AudioManager: ObservableObject {
+//    private var player: AVAudioPlayer?
+//
+//    func configureSession() {
+//        do {
+//            // .ambient respects the silent switch (no background capability needed)
+//            // Use .playback if you want to ignore silent switch
+//            try AVAudioSession.sharedInstance().setCategory(.ambient, mode: .default, options: [])
+//            try AVAudioSession.sharedInstance().setActive(true)
+//        } catch {
+//            print("⚠️ Audio session error:", error)
+//        }
+//    }
+//
+//    func load(resource: String, ext: String) {
+//        guard let url = Bundle.main.url(forResource: resource, withExtension: ext) else {
+//            print("❌ music file not found: \(resource).\(ext)")
+//            return
+//        }
+//        do {
+//            player = try AVAudioPlayer(contentsOf: url)
+//            player?.numberOfLoops = -1       // loop forever
+//            player?.prepareToPlay()
+//            player?.volume = 0.5
+//        } catch {
+//            print("⚠️ AVAudioPlayer init failed:", error)
+//        }
+//    }
+//
+//    func play() {
+//        player?.play()
+//    }
+//
+//    func pause() {
+//        player?.pause()
+//    }
+//
+//    func stop() {
+//        player?.stop()
+//        player = nil
+//        try? AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+//    }
+//}
 
 struct Onboarding: View {
+    @State private var selectedIndex = 0
     @State private var isOn = true
     @State private var page = 0
-    @StateObject private var audio = AudioManager()   // 👈 keep the player alive
+    @Binding var showOnboarding: Bool
+    @AppStorage("hasSeenOnboarding") private var hasSeenOnboarding = false
+    @StateObject private var audio = AudioManager.shared
+//    @StateObject private var audio = AudioManager()   // 👈 keep the player alive
 
-    init() {
-        UIPageControl.appearance().isHidden = true
-    }
+//    init() {
+//        UIPageControl.appearance().isHidden = true
+//    }
 
     private let bg = Color(red: 240/255, green: 240/255, blue: 250/255)
+
 
     private let slides: [OnboardingSlide] = [
         .init(
@@ -96,32 +101,26 @@ struct Onboarding: View {
 
     // ✅ Green & enabled only on the last slide
     private var isLastPage: Bool { page == slides.count - 1 }
-
+//ةة
     var body: some View {
         ZStack(alignment: .topLeading) {
             bg.ignoresSafeArea()
 
-            Toggle("", isOn: $isOn)
-                .labelsHidden()
-                .toggleStyle(
-                    SpeakerToggleStyle(
-                        onColor: Color(hex: "FFEDA8"),
-                        offColor: Color.gray.opacity(0.2),
-                        iconColor: Color(hex: "28362B"),
-                        shadowColor: Color(hex: "B0A6DF")
-                    )
-                )
-                .padding(.top, 24)
-                .padding(.leading, 24)
-                // 🔊 respond to toggle changes
-                .onChange(of: isOn) { on in
-                    if on {
-                        audio.play()
-                    } else {
-                        audio.pause()
-                    }
-                }
-
+            Toggle(isOn: $audio.isPlaying) {
+                Image(systemName: audio.isPlaying ? "speaker.wave.2.fill" : "speaker.slash.fill")
+                    .foregroundColor(.white)
+            }
+            .labelsHidden()
+            .onChange(of: audio.isPlaying) { playing in
+                playing ? audio.play() : audio.pause()
+            }
+            .toggleStyle(SpeakerToggleStyle(
+                onColor: AppTheme.yellow,
+                offColor: Color.gray.opacity(0.2),
+                iconColor: Color.black,
+                shadowColor: AppTheme.accent )
+                         )
+            .padding()
             VStack(spacing: 16) {
                 Spacer().frame(height: 100)
 
@@ -135,6 +134,8 @@ struct Onboarding: View {
                 }
                 .tabViewStyle(.page(indexDisplayMode: .never))
                 .frame(height: 380)
+                .background(bg)
+
 
                 // --- Tappable dots between card and buttons ---
                 DotsIndicator(total: slides.count, current: $page)
@@ -144,8 +145,8 @@ struct Onboarding: View {
 
                 // ✅ CTA: green & enabled only on last slide; dim/disabled otherwise
                 Button(ctaTitle) {
-                    // Runs only when enabled (last slide)
-                    // TODO: continue app flow (dismiss onboarding / navigate)
+                    hasSeenOnboarding = true
+                    showOnboarding = false
                 }
                 .font(.nunitoBold(24))
                 .foregroundColor(.white)
@@ -281,44 +282,6 @@ struct OnboardingCard: View {
     }
 }
 
-// MARK: - Toggle Style
-struct SpeakerToggleStyle: ToggleStyle {
-    var onColor: Color
-    var offColor: Color
-    var iconColor: Color
-    var shadowColor: Color
-
-    private let trackWidth: CGFloat = 88
-    private let trackHeight: CGFloat = 44
-    private let padding: CGFloat = 4
-
-    func makeBody(configuration: Configuration) -> some View {
-        let knobSize = trackHeight - padding * 2
-        let travel = (trackWidth - knobSize) / 2.5
-
-        return ZStack {
-            Capsule()
-                .fill(configuration.isOn ? onColor : offColor)
-                .frame(width: trackWidth, height: trackHeight)
-                .shadow(color: configuration.isOn ? shadowColor.opacity(0.35) : .clear,
-                        radius: 12, x: 16, y: 6)
-
-            Circle()
-                .fill(.white)
-                .frame(width: knobSize, height: knobSize)
-                .shadow(color: .black.opacity(0.12), radius: 6, x: 0, y: 3)
-                .overlay(
-                    Image(systemName: configuration.isOn ? "speaker.wave.2" : "speaker.slash")
-                        .font(.system(size: 16, weight: .semibold))
-                        .foregroundStyle(iconColor)
-                )
-                .offset(x: configuration.isOn ? travel : -travel)
-                .animation(.spring(response: 0.25, dampingFraction: 0.9), value: configuration.isOn)
-        }
-        .contentShape(Rectangle())
-        .onTapGesture { configuration.isOn.toggle() }
-    }
-}
 
 // MARK: - Font helpers
 extension Font {
@@ -340,4 +303,6 @@ extension Color {
     }
 }
 
-#Preview { Onboarding() }
+#Preview {
+    Onboarding(showOnboarding: .constant(true))
+}
