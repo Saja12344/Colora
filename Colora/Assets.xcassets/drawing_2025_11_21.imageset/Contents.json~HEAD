@@ -1,0 +1,25 @@
+{
+  "images" : [
+    {
+<<<<<<< HEAD:Colora/Assets.xcassets/drawing_2025_11_21.imageset/Contents.json
+      "filename" : "artwork3.png",
+=======
+      "filename" : "97015fdf-9009-4529-9845-ef7e3fce0760.jpg",
+>>>>>>> main:Colora/Assets.xcassets/drawing_2025_10_15.imageset/Contents.json
+      "idiom" : "universal",
+      "scale" : "1x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "2x"
+    },
+    {
+      "idiom" : "universal",
+      "scale" : "3x"
+    }
+  ],
+  "info" : {
+    "author" : "xcode",
+    "version" : 1
+  }
+}

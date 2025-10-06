@@ -212,7 +212,8 @@ struct ArtworkGalleryView: View {
     }
 }
 
-//import SwiftUI
 
-// MARK: - Gallery View
+#Preview {
+    ArtworkGalleryView()
+}
 

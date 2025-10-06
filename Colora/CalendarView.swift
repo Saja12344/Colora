@@ -14,6 +14,7 @@ struct DayData: Identifiable {
     let imageName: String? // nil = مافي صورة
 }
 
+
 struct CalendarView: View {
     @State private var months: [CalendarMonth] = []
     @State private var showPopup = false
@@ -26,61 +27,63 @@ struct CalendarView: View {
     // 👇 لعرض اللوحة المختارة
     @State private var showGallery = false
     @State private var selectedImageName: String? = nil
+    @ObservedObject var calendar = CalendarModel.shared
+
 
     var body: some View {
-        NavigationView {
-            ZStack {
-                ScrollView {
-                    LazyVStack(spacing: 0) {
-                        ForEach(months) { month in
-                            MonthView(month: month)
+
+                NavigationView {
+                    ZStack {
+                        ScrollView {
+                            LazyVStack(spacing: 0) {
+                                ForEach(months) { month in
+                                    MonthView(month: month)
+                                }
+                            }
+                            .padding(.vertical)
+                        }
+                        .blur(radius: showPopup ? 6 : 0)
+                        
+                        // 👇 Popup
+                        if showPopup {
+                            PopupView(showPopup: $showPopup,
+                                      teamName: $teamName,
+                                      isEditing: $isEditing,
+                                      isSoundOn: $isSoundOn)
                         }
                     }
-                    .padding(.vertical)
-                }
-                .blur(radius: showPopup ? 6 : 0)
-                
-                // 👇 Popup (محافظين على نفس التصميم)
-                if showPopup {
-                    PopupView(showPopup: $showPopup,
-                              teamName: $teamName, // ✅ Binding to AppStorage
-                              isEditing: $isEditing,
-                              isSoundOn: $isSoundOn)
-                }
-            }
-            .onAppear {
-                if months.isEmpty { loadTenMonths() }
-                UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
-                UINavigationBar.appearance().shadowImage = UIImage()
-
-                // 👇 مراقبة اختيار الصورة من DayCell
-                NotificationCenter.default.addObserver(forName: .didSelectArtworkImage, object: nil, queue: .main) { notif in
-                    if let name = notif.object as? String {
-                        selectedImageName = name
-                        showGallery = true
+                    .onAppear {
+                        if months.isEmpty { loadTenMonths() }
+                        UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
+                        UINavigationBar.appearance().shadowImage = UIImage()
+                        
+                        NotificationCenter.default.addObserver(forName: .didSelectArtworkImage, object: nil, queue: .main) { notif in
+                            if let name = notif.object as? String {
+                                selectedImageName = name
+                                showGallery = true
+                            }
+                        }
                     }
-                }
-            }
-
-            .appBackground()
-            .toolbar {
-                ToolbarItemGroup(placement: .navigationBarLeading) {
-                    Button {
-                        withAnimation { showPopup = true }
-                    } label: {
-                        Image(systemName: "gearshape")
-                            .foregroundColor(.white)
-                    }
-                }
-                
-                ToolbarItemGroup(placement: .navigationBarTrailing) {
-                    NavigationLink(destination: HomePage()
-                        .navigationBarBackButtonHidden(true)) {
-                            Image(systemName: "chevron.forward")
+                    .appBackground()
+             
+                .toolbar {
+                    ToolbarItemGroup(placement: .navigationBarLeading) {
+                        Button {
+                            withAnimation { showPopup = true }
+                        } label: {
+                            Image(systemName: "gearshape")
                                 .foregroundColor(.white)
                         }
+                    }
+                    
+                    ToolbarItemGroup(placement: .navigationBarTrailing) {
+                        NavigationLink(destination: HomePage()
+                            .navigationBarBackButtonHidden(true)) {
+                                Image(systemName: "chevron.forward")
+                                    .foregroundColor(.white)
+                            }
+                    }
                 }
-            }
             
             // 👇 عرض الصفحة الرئيسية
             .fullScreenCover(isPresented: $showHome) {
