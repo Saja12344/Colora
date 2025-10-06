@@ -18,12 +18,15 @@ struct CalendarView: View {
     @State private var months: [CalendarMonth] = []
     @State private var showPopup = false
     @State private var isSoundOn = true
-    @State private var teamName = "Team 19"
+    @AppStorage("userName") private var teamName: String = "Team 19" // ✅ Load saved username
     @State private var isEditing = false
     @State private var showHome = false
     @Binding var showCalendar: Bool
-
     
+    // 👇 لعرض اللوحة المختارة
+    @State private var showGallery = false
+    @State private var selectedImageName: String? = nil
+
     var body: some View {
         NavigationView {
             ZStack {
@@ -40,7 +43,7 @@ struct CalendarView: View {
                 // 👇 Popup (محافظين على نفس التصميم)
                 if showPopup {
                     PopupView(showPopup: $showPopup,
-                              teamName: $teamName,
+                              teamName: $teamName, // ✅ Binding to AppStorage
                               isEditing: $isEditing,
                               isSoundOn: $isSoundOn)
                 }
@@ -49,8 +52,17 @@ struct CalendarView: View {
                 if months.isEmpty { loadTenMonths() }
                 UINavigationBar.appearance().setBackgroundImage(UIImage(), for: .default)
                 UINavigationBar.appearance().shadowImage = UIImage()
+
+                // 👇 مراقبة اختيار الصورة من DayCell
+                NotificationCenter.default.addObserver(forName: .didSelectArtworkImage, object: nil, queue: .main) { notif in
+                    if let name = notif.object as? String {
+                        selectedImageName = name
+                        showGallery = true
+                    }
+                }
             }
-            .appBackground() // تستخدمها كما كانت
+
+            .appBackground()
             .toolbar {
                 ToolbarItemGroup(placement: .navigationBarLeading) {
                     Button {
@@ -61,22 +73,28 @@ struct CalendarView: View {
                     }
                 }
                 
-           
-                    ToolbarItemGroup(placement: .navigationBarTrailing) {
-                        NavigationLink(destination: HomePage()
+                ToolbarItemGroup(placement: .navigationBarTrailing) {
+                    NavigationLink(destination: HomePage()
                         .navigationBarBackButtonHidden(true)) {
                             Image(systemName: "chevron.forward")
                                 .foregroundColor(.white)
                         }
-                    }
                 }
+            }
             
-        
-
-
-            
+            // 👇 عرض الصفحة الرئيسية
             .fullScreenCover(isPresented: $showHome) {
                 HomePage()
+            }
+
+            // 👇 عرض المعرض (ArtworkGalleryView) مع تمرير startIndex الصحيح
+            .fullScreenCover(isPresented: $showGallery) {
+                if let selectedName = selectedImageName,
+                   let startIndex = sampleArtworks.firstIndex(where: { $0.imageName == selectedName }) {
+                    ArtworkGalleryView(artworks: sampleArtworks, startIndex: startIndex)
+                } else {
+                    ArtworkGalleryView(artworks: sampleArtworks)
+                }
             }
 
             .navigationBarTitleDisplayMode(.inline)
@@ -120,13 +138,12 @@ struct CalendarView: View {
     }
 }
 
-// MARK: - Month View (نفس التخطيط و القيم)
+// MARK: - Month View
 struct MonthView: View {
     let month: CalendarMonth
     
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            // 👇 عنوان الشهر (نفس القيم)
             Text(monthTitle(for: month.month))
                 .font(.headline)
                 .padding(.leading, -165)
@@ -136,10 +153,11 @@ struct MonthView: View {
                 .clipShape(RoundedCorner(radius: 30, corners: [.topLeft, .topRight]))
                 .padding(.top, 50)
             
-            // 👇 أيام الشهر
             LazyVGrid(columns: Array(repeating: GridItem(.flexible()), count: 5), spacing: 16) {
                 ForEach(month.days) { day in
-                    DayCell(day: day, days: month.days)
+                    DayCell(day: day, days: month.days, onImageTap: { imageName in
+                        NotificationCenter.default.post(name: .didSelectArtworkImage, object: imageName)
+                    })
                 }
             }
             .frame(width: 360)
@@ -151,9 +169,6 @@ struct MonthView: View {
         }
     }
     
-    
-
-    
     private func monthTitle(for date: Date) -> String {
         let formatter = DateFormatter()
         formatter.dateFormat = "MMMM yyyy"
@@ -161,36 +176,44 @@ struct MonthView: View {
     }
 }
 
-// MARK: - Day Cell (نفس الشكل، مع isStreak محلي)
+// MARK: - Day Cell
 struct DayCell: View {
     let day: DayData
     let days: [DayData]
-    
+    var onImageTap: (String) -> Void
+
     var body: some View {
-        ZStack(alignment: .bottomLeading) {
+        Button {
             if let imageName = day.imageName {
-                Image(imageName)
-                    .resizable()
-                    .scaledToFill()
-                    .frame(width: 60, height: 55)
-                    .clipped()
-                    .cornerRadius(8)
-                    .overlay(
-                        RoundedRectangle(cornerRadius: 8)
-                            .stroke(isStreak ? AppTheme.Streak : Color.clear, lineWidth: 4)
-                    )
-            } else {
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(AppTheme.daysBackground.opacity(0.7))
-                    .frame(width: 60, height: 55)
+                onImageTap(imageName)
             }
-            
-            Text("\(Calendar.current.component(.day, from: day.date))")
-                .font(.caption)
-                .bold()
-                .foregroundColor(AppTheme.monthsBackground)
-                .padding(4)
+        } label: {
+            ZStack(alignment: .bottomLeading) {
+                if let imageName = day.imageName {
+                    Image(imageName)
+                        .resizable()
+                        .scaledToFill()
+                        .frame(width: 60, height: 55)
+                        .clipped()
+                        .cornerRadius(8)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 8)
+                                .stroke(isStreak ? AppTheme.Streak : Color.clear, lineWidth: 4)
+                        )
+                } else {
+                    RoundedRectangle(cornerRadius: 8)
+                        .fill(AppTheme.daysBackground.opacity(0.7))
+                        .frame(width: 60, height: 55)
+                }
+                
+                Text("\(Calendar.current.component(.day, from: day.date))")
+                    .font(.caption)
+                    .bold()
+                    .foregroundColor(AppTheme.monthsBackground)
+                    .padding(4)
+            }
         }
+        .buttonStyle(.plain)
     }
     
     private var isStreak: Bool {
@@ -212,7 +235,7 @@ struct DayCell: View {
     }
 }
 
-// MARK: - Popup View (نفس الحجم والخلفية والزجاج)
+// MARK: - Popup View
 struct PopupView: View {
     @Binding var showPopup: Bool
     @Binding var teamName: String
@@ -242,13 +265,12 @@ struct PopupView: View {
                 
                 HStack {
                     if isEditing {
-                        TextField("Team Name", text: $teamName)
+                        TextField("Your name", text: $teamName)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .foregroundColor(.black)
                         
                         Button {
                             isEditing = false
-                            // هنا ممكن تضيف أي عملية حفظ الاسم
                         } label: {
                             Image(systemName: "checkmark")
                                 .foregroundColor(.white)
@@ -275,40 +297,38 @@ struct PopupView: View {
                             .foregroundColor(.white)
                     }
                     .labelsHidden()
-                    .onChange(of: audio.isPlaying) { playing in
-                        playing ? audio.play() : audio.pause()
+                    .onChange(of: audio.isPlaying) { oldValue, newValue in
+                        newValue ? audio.play() : audio.pause()
                     }
                     .toggleStyle(SpeakerToggleStyle(
                         onColor: AppTheme.Streak,
                         offColor: Color.gray.opacity(0.2),
                         iconColor: Color.black,
                         shadowColor: AppTheme.accent )
-                                 )
+                    )
                 }
 
             }
             .frame(width: 350,height: 280)
-            
-            //background -- glass with grean
-            
             .background(
-                AppTheme.daysBackground.opacity(0.6) // لون خفيف
-                    .background(.ultraThinMaterial)   // زجاج
+                AppTheme.daysBackground.opacity(0.6)
+                    .background(.ultraThinMaterial)
             )
             .cornerRadius(16)
             .shadow(radius: 10)
         }
-        // اهم شيء هو يشتغل الصوت
         .onAppear {
             audio.configureSession()
             audio.load(resource: "music", ext: "mp3")
             if audio.isPlaying { audio.play() }
         }
-        
     }
-    
 }
 
+// 👇 إشعار لاختيار الصورة من الخلايا
+extension Notification.Name {
+    static let didSelectArtworkImage = Notification.Name("didSelectArtworkImage")
+}
 
 #if DEBUG
 struct InfiniteCalendarView_Previews: PreviewProvider {

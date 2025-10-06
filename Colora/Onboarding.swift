@@ -71,7 +71,6 @@ struct Onboarding: View {
 
     private let bg = Color(red: 240/255, green: 240/255, blue: 250/255)
 
-
     private let slides: [OnboardingSlide] = [
         .init(
             tagTitle: "Draw",
@@ -101,6 +100,10 @@ struct Onboarding: View {
 
     // ✅ Green & enabled only on the last slide
     private var isLastPage: Bool { page == slides.count - 1 }
+
+    // ✅ Added: control WelcomePageView navigation
+    @State private var goToWelcome = false
+
 //ةة
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -111,8 +114,8 @@ struct Onboarding: View {
                     .foregroundColor(.white)
             }
             .labelsHidden()
-            .onChange(of: audio.isPlaying) { playing in
-                playing ? audio.play() : audio.pause()
+            .onChange(of: audio.isPlaying) { oldValue, newValue in
+                newValue ? audio.play() : audio.pause()
             }
             .toggleStyle(SpeakerToggleStyle(
                 onColor: AppTheme.yellow,
@@ -136,17 +139,16 @@ struct Onboarding: View {
                 .frame(height: 380)
                 .background(bg)
 
-
                 // --- Tappable dots between card and buttons ---
                 DotsIndicator(total: slides.count, current: $page)
                     .padding(.top, 4)
 
                 Spacer()
 
-                // ✅ CTA: green & enabled only on last slide; dim/disabled otherwise
+                // ✅ CTA: green & enabled only on last slide; navigates to WelcomePageView
                 Button(ctaTitle) {
                     hasSeenOnboarding = true
-                    showOnboarding = false
+                    goToWelcome = true
                 }
                 .font(.nunitoBold(24))
                 .foregroundColor(.white)
@@ -160,10 +162,14 @@ struct Onboarding: View {
                 .disabled(!isLastPage)          // not tappable until last slide
                 .allowsHitTesting(isLastPage)   // ignore taps when not last
 
-                Button(skip) { }
-                    .font(.nunitoMedium(16))
-                    .foregroundColor(Color(hex: "28362B"))
-                    .padding(.bottom, 24)
+                // ✅ Skip button — jumps straight to WelcomePageView
+                Button(skip) {
+                    hasSeenOnboarding = true
+                    goToWelcome = true
+                }
+                .font(.nunitoMedium(16))
+                .foregroundColor(Color(hex: "28362B"))
+                .padding(.bottom, 24)
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
         }
@@ -175,6 +181,10 @@ struct Onboarding: View {
         }
         .onDisappear {
             audio.stop()
+        }
+        // ✅ Presents the WelcomePageView full screen
+        .fullScreenCover(isPresented: $goToWelcome) {
+            WelcomePageView()
         }
     }
 }
@@ -202,7 +212,7 @@ struct DotsIndicator: View {
                         .padding(.horizontal, 6)
                         .padding(.vertical, 8)
                         .contentShape(Rectangle())
-                        .accessibilityLabel("Go to page \(i + 1)")
+                        .accessibilityLabel("Go to page \\(i + 1)")
                         .accessibilityAddTraits(isCurrent ? .isSelected : [])
                 }
                 .buttonStyle(.plain)
@@ -281,7 +291,6 @@ struct OnboardingCard: View {
             .frame(width: cardWidth, height: cardHeight)
     }
 }
-
 
 // MARK: - Font helpers
 extension Font {
