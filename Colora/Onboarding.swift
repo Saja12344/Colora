@@ -258,6 +258,7 @@ struct OnboardingCard: View {
                             .font(.nunitoBold(24))
                             .foregroundColor(Color(hex: "FFEDA8"))
                             .lineLimit(1)
+                        
 
                         Spacer(minLength: 0)
 

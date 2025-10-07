@@ -1,7 +1,11 @@
 {
   "images" : [
     {
-      "filename" : "Image.png",
+<<<<<<< HEAD:Colora/Assets.xcassets/drawing_2025_10_12.imageset/Contents.json
+      "filename" : "artwork2.png",
+=======
+      "filename" : "ae073aff-3d37-4ca7-8788-7a04f2925c21.jpg",
+>>>>>>> main:Colora/Assets.xcassets/drawing_2025_10_14.imageset/Contents.json
       "idiom" : "universal",
       "scale" : "1x"
     },

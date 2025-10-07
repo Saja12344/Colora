@@ -212,6 +212,8 @@ struct ArtworkGalleryView: View {
     }
 }
 
+
 #Preview {
     ArtworkGalleryView()
 }
+
