@@ -58,36 +58,36 @@ struct ArtworkModel: Identifiable {
 }
 
 // Singleton لإدارة الرسم في الكالندر
-class CalendarModel: ObservableObject {
-    static let shared = CalendarModel()
-    @Published var artworks: [ArtworkModel] = []
-
-    private init() {}
-
-    // إضافة باستخدام الاسم والصورة والتاريخ
-    func addArtwork(name: String, image: UIImage, date: Date = Date()) {
-        let artwork = ArtworkModel(name: name, date: date, image: image)
-        artworks.append(artwork)
-    }
-
-    // إضافة باستخدام صورة فقط (سيتم توليد الاسم تلقائيًا)
-    func addArtwork(_ image: UIImage) {
-        let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy_MM_dd"
-        let name = "drawing_\(formatter.string(from: Date()))"
-        
-        // حفظ الصورة في المستندات
-        if let data = image.pngData() {
-            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
-                .appendingPathComponent("\(name).png")
-            try? data.write(to: url)
-        }
-        
-        // إضافة إلى مصفوفة artworks
-        let artwork = ArtworkModel(name: name, date: Date(), image: image)
-        artworks.append(artwork)
-    }
-}
+//class CalendarModel: ObservableObject {
+//    static let shared = CalendarModel()
+//    @Published var artworks: [ArtworkModel] = []
+//
+//    private init() {}
+//
+//    // إضافة باستخدام الاسم والصورة والتاريخ
+//    func addArtwork(name: String, image: UIImage, date: Date = Date()) {
+//        let artwork = ArtworkModel(name: name, date: date, image: image)
+//        artworks.append(artwork)
+//    }
+//
+//    // إضافة باستخدام صورة فقط (سيتم توليد الاسم تلقائيًا)
+//    func addArtwork(_ image: UIImage) {
+//        let formatter = DateFormatter()
+//        formatter.dateFormat = "yyyy_MM_dd"
+//        let name = "drawing_\(formatter.string(from: Date()))"
+//        
+//        // حفظ الصورة في المستندات
+//        if let data = image.pngData() {
+//            let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+//                .appendingPathComponent("\(name).png")
+//            try? data.write(to: url)
+//        }
+//        
+//        // إضافة إلى مصفوفة artworks
+//        let artwork = ArtworkModel(name: name, date: Date(), image: image)
+//        artworks.append(artwork)
+//    }
+//}
 
 
 

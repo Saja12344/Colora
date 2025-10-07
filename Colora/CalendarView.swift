@@ -430,13 +430,15 @@ struct CalendarView: View {
 
             // FullScreen Cover for Artwork Gallery
             .fullScreenCover(isPresented: $showGallery) {
+                let artworks = CalendarModel.shared.artworks
                 if let selectedName = selectedImageName,
-                   let startIndex = sampleArtworks.firstIndex(where: { $0.imageName == selectedName }) {
-                    ArtworkGalleryView(artworks: sampleArtworks, startIndex: startIndex)
+                   let startIndex = artworks.firstIndex(where: { $0.imageName == selectedName }) {
+                    ArtworkGalleryView(artworks: artworks, startIndex: startIndex)
                 } else {
-                    ArtworkGalleryView(artworks: sampleArtworks)
+                    ArtworkGalleryView(artworks: artworks)
                 }
             }
+
 
             .navigationBarTitleDisplayMode(.inline)
             .toolbarBackground(.ultraThinMaterial.opacity(3), for: .navigationBar)
@@ -463,18 +465,28 @@ struct CalendarView: View {
         }
 
         let formatter = DateFormatter()
-        formatter.dateFormat = "yyyy_MM_dd"
+        formatter.calendar = calendar
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy_MM_dd"   // نفس اللي تستخدمينه في اسم الملف
 
         let days = range.map { day -> DayData in
             let dayDate = calendar.date(bySetting: .day, value: day, of: date)!
-            // ربط الرسم مع CalendarModel
-            let artwork = CalendarModel.shared.artworks.first { calendar.isDate($0.date, inSameDayAs: dayDate) }
-            return DayData(date: dayDate, imageName: artwork?.name) // استخدم 'name' بدل 'imageName'
+            let dayKey = formatter.string(from: dayDate)
 
+            // ✅ بدل isDate(..): طابق بالنص
+            let artwork = CalendarModel.shared.artworks.first { art in
+                // لو التاريخ محفوظ كنص بنفس النمط
+                if art.date == dayKey { return true }
+                // أو لو اسم الصورة يحتوي اليوم (مثل drawing_yyyy_MM_dd.png / بدون امتداد)
+                return art.imageName.contains(dayKey)
+            }
+
+            return DayData(date: dayDate, imageName: artwork?.imageName)
         }
 
         return CalendarMonth(month: date, days: days)
     }
+
 }
 
 // MARK: - Month View

@@ -298,25 +298,20 @@ struct Canva: View {
                         }
                     }
                 }
-            }
-            .toolbar {
+            }.toolbar {
                 // Back button
                 ToolbarItem(placement: .topBarLeading) {
                     Button {
                         withAnimation(.spring()) { offsetY = UIScreen.main.bounds.height }
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { dismiss() }
                     } label: {
-                        HStack(spacing: 5) {
-                            Image(systemName: "chevron.backward")
-                                .foregroundColor(AppTheme.bg.opacity(0.7))
-                                .font(.system(size: 18, weight: .medium))
-                        }
-                        .padding(10)
-                        .foregroundColor(AppTheme.Streak)
-                        .cornerRadius(12)
+                        Image(systemName: "chevron.backward")
+                            .foregroundColor(AppTheme.bg.opacity(0.7))
+                            .font(.system(size: 18, weight: .medium))
+                            .padding(10)
                     }
                 }
-                
+
                 // Tool Picker toggle
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: toggleToolPicker) {
@@ -324,9 +319,37 @@ struct Canva: View {
                     }
                     .foregroundColor(AppTheme.bg.opacity(0.7))
                 }
-                
-                // Done button
+
+                // ✅ Undo button
                 if isToolPickerVisible {
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            canvasView.undoManager?.undo()
+                        } label: {
+                            Image(systemName: "arrow.uturn.backward")
+                                .foregroundColor(AppTheme.bg.opacity(0.7))
+                        }
+                    }
+
+                    // ✅ Redo button
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button {
+                            canvasView.undoManager?.redo()
+                        } label: {
+                            Image(systemName: "arrow.uturn.forward")
+                                .foregroundColor(AppTheme.bg.opacity(0.7))
+                        }
+                    }
+
+                    // Clear canvas
+                    ToolbarItem(placement: .topBarTrailing) {
+                        Button { clearCanvas() } label: {
+                            Image(systemName: "trash")
+                                .foregroundColor(AppTheme.bg.opacity(0.7))
+                        }
+                    }
+
+                    // Done button
                     ToolbarItem(placement: .topBarTrailing) {
                         Button("Done") {
                             let image = canvasView.drawing.image(from: canvasView.bounds, scale: UIScreen.main.scale)
@@ -337,17 +360,8 @@ struct Canva: View {
                         .foregroundColor(AppTheme.bg.opacity(0.7))
                     }
                 }
-                
-                // Clear canvas
-                if isToolPickerVisible {
-                    ToolbarItem(placement: .topBarTrailing) {
-                        Button { clearCanvas() } label: {
-                            Image(systemName: "trash")
-                                .foregroundColor(AppTheme.bg.opacity(0.7))
-                        }
-                    }
-                }
             }
+
             
             // NavigationLink to SaveArtwork
             NavigationLink(

@@ -387,7 +387,13 @@ struct saveArtowrk: View {
             try? data.write(to: url)
         }
 
-        CalendarModel.shared.addArtwork(name: fileName, image: artworkImage)
+        CalendarModel.shared.addArtwork(
+            name: fileName,
+            title: artworkName,
+            description: artworkDescription,
+            image: artworkImage
+        )
+
 
         withAnimation { mainSaveButton = true }
         DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) { withAnimation { mainSaveButton = false } }

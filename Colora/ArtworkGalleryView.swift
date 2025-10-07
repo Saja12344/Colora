@@ -14,6 +14,14 @@ func saveImageToAlbum(_ image: UIImage) {
     UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
 }
 
+
+func loadImageFromDocuments(name: String) -> UIImage? {
+    let url = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0]
+        .appendingPathComponent(name)
+    return UIImage(contentsOfFile: url.path)
+}
+
+
 struct ArtworkGalleryView: View {
     var artworks: [Artwork] = sampleArtworks
     var startIndex: Int = 0   // 👈 to open at specific artwork
@@ -57,10 +65,19 @@ struct ArtworkGalleryView: View {
                             Spacer()
 
                             Button(action: {
-                                if let uiImage = UIImage(named: artworks[index].imageName) {
-                                    saveImageToAlbum(uiImage)
+//                                if let uiImage = UIImage(named: artworks[index].imageName) {
+//                                    saveImageToAlbum(uiImage)
+//                                    withAnimation { isShowingSaveAlert = true }
+//                                }
+                                if let uiImage = loadImageFromDocuments(name: artworks[index].imageName) {
+                                    Image(uiImage: uiImage)
+                                        .resizable()
+                                        .scaledToFit()
+                                        .clipShape(RoundedRectangle(cornerRadius: 20))
+                                        .padding(10)
                                     withAnimation { isShowingSaveAlert = true }
                                 }
+
                             }) {
                                 Image(systemName: "square.and.arrow.down")
                                     .font(.title2)
