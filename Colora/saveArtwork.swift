@@ -488,12 +488,11 @@ struct saveArtowrk: View {
                     }
                     .padding(.horizontal)
 
-                    NavigationLink("", destination:
+                    .navigationDestination(isPresented: $goToCalendar) {
                         CalendarView(showCalendar: $showCalendar)
-                        .navigationBarBackButtonHidden(true), // ✅ حطيها هنا داخل الـ destination
-                        isActive: $goToCalendar
-                    )
-                        .hidden()
+                            .navigationBarBackButtonHidden(true)
+                    }
+
 
                 }
                 .padding(.bottom, 70)

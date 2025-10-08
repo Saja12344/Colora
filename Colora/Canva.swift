@@ -249,9 +249,9 @@ struct CanvasView: UIViewRepresentable {
            canvasView.backgroundColor = .clear
 
            // ✅ عرض الـ ToolPicker
-           if let window = UIApplication.shared.connectedScenes
-               .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
-               .first {
+           if UIApplication.shared.connectedScenes
+            .compactMap({ ($0 as? UIWindowScene)?.keyWindow })
+            .first != nil {
                toolPicker.setVisible(true, forFirstResponder: canvasView)
                toolPicker.addObserver(canvasView)
                canvasView.becomeFirstResponder()
@@ -350,17 +350,13 @@ struct Canva: View {
             }
             
             // NavigationLink to SaveArtwork
-            NavigationLink(
-                destination: Group {
-                    if let artwork = savedArtwork {
-                        saveArtowrk(artworkImage: artwork, showCalendar: $showCalendar)
-                            .navigationBarBackButtonHidden(true)
-                    }
-                },
-                isActive: $showSavePage,
-                label: { EmptyView() }
-            )
-            .hidden()
+            .navigationDestination(isPresented: $showSavePage) {
+                if let artwork = savedArtwork {
+                    saveArtowrk(artworkImage: artwork, showCalendar: $showCalendar)
+                        .navigationBarBackButtonHidden(true)
+                }
+            }
+
             
             .navigationBarTitleDisplayMode(.inline)
         }
